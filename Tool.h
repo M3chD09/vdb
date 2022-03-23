@@ -3,13 +3,20 @@
 #include "BBox3D.h"
 #include "Vector3D.h"
 
+#include <vector>
+
 class Tool {
 public:
-    Tool() {};
+    Tool()
+    {
+        loadPaths();
+    };
     ~Tool() {};
-
-    float radius = 50.0f;
-    Vector3D<float> center = Vector3D<float>(0, 0, 500);
+    Tool(float _radius)
+        : radius(_radius)
+    {
+        loadPaths();
+    };
 
     BBox3D<float> getBBox()
     {
@@ -27,4 +34,45 @@ public:
 
         return false;
     }
+
+    void loadPaths()
+    {
+        paths.clear();
+        paths.push_back(std::vector<Vector3D<float>> {
+            Vector3D<float>(0, 400, 500),
+            Vector3D<float>(-300, -400, 500),
+            Vector3D<float>(400, 100, 500),
+            Vector3D<float>(-400, 100, 500),
+            Vector3D<float>(300, -400, 500),
+            Vector3D<float>(0, 400, 500),
+        });
+        center = paths[0][0];
+    }
+
+    bool moveToNextPos()
+    {
+        if (paths.size() <= currentPathListIndex) {
+            return false;
+        }
+        Vector3D<float> currentPos = paths[currentPathListIndex][currentPathIndex];
+        float distance = currentPos.distanceToPoint(center);
+        if (distance <= pathStep) {
+            center = currentPos;
+            currentPathIndex++;
+            if (currentPathIndex >= paths[currentPathListIndex].size()) {
+                currentPathListIndex++;
+                currentPathIndex = 0;
+            }
+        } else {
+            center += (currentPos - center).normalize() * pathStep;
+        }
+        return true;
+    }
+
+    const float pathStep = 10.0f;
+    const float radius = 50.0f;
+    Vector3D<float> center;
+    size_t currentPathIndex = 0;
+    size_t currentPathListIndex = 0;
+    std::vector<std::vector<Vector3D<float>>> paths;
 };

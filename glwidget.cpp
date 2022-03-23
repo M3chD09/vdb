@@ -25,11 +25,20 @@ GLWidget::~GLWidget()
 
 void GLWidget::updateTopology()
 {
+    if (!tool.moveToNextPos()) {
+        timerUpdate->stop();
+        timerCal->stop();
+        return;
+    }
+    auto isInside = [&](const Vector3D<float>& p) {
+        return tool.isInside(p);
+    };
+    topology.subtract(tool.getBBox(), isInside);
 }
 
 void GLWidget::calTopology()
 {
-
+    topology.calculateVoxels(coords, sizes);
     update();
 }
 
@@ -55,14 +64,12 @@ void GLWidget::initializeGL()
     program->setUniformValue("lightColor", lightColor);
     program->setUniformValue("lightPos", lightPos);
 
-    auto isInside = [&](const Vector3D<float>& p) {
-        return tool.isInside(p);
-    };
-    topology.subtract(tool.getBBox(), isInside);
+#ifdef USE_TBB
+    std::cout << "Using TBB" << std::endl;
+#endif
+
     topology.calculateVoxels(coords, sizes);
-    std::cout << "root half edge length: " << topology.root.halfEdgeLength() << std::endl;
     unsigned int leafCount = (unsigned int)coords.size();
-    std::cout << "leafCount: " << leafCount << std::endl;
 
     if (!vao.isCreated()) {
         vao.create();
@@ -130,9 +137,9 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
 
     if (event->key() == Qt::Key_Z) {
         connect(timerUpdate, &QTimer::timeout, this, QOverload<>::of(&GLWidget::updateTopology));
-        timerUpdate->start(10);
+        timerUpdate->start(1);
         connect(timerCal, &QTimer::timeout, this, QOverload<>::of(&GLWidget::calTopology));
-        timerCal->start(10);
+        timerCal->start(1);
     }
     if (event->key() == Qt::Key_P) {
         timerUpdate->stop();
@@ -141,6 +148,10 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
     if (event->key() == Qt::Key_R) {
         timerUpdate->stop();
         timerCal->stop();
+        tool.currentPathIndex = 0;
+        tool.currentPathListIndex = 0;
+        topology.reset();
+        topology.calculateVoxels(coords, sizes);
     }
 
     update();

@@ -28,6 +28,11 @@ public:
     {
     }
 
+    void reset()
+    {
+        root.reset();
+    }
+
     void calculateVoxels(std::vector<Vector3D<float>>& coords, std::vector<float>& sizes)
     {
         coords.clear();

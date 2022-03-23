@@ -85,6 +85,15 @@ public:
     NodeWithChildren() {};
     ~NodeWithChildren() {};
 
+    void reset()
+    {
+        for (auto& child : children) {
+            child.reset();
+        }
+        this->isActive = true;
+        this->hasChildren = false;
+    }
+
     void subdivide()
     {
         this->hasChildren = true;
