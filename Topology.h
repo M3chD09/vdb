@@ -16,13 +16,11 @@
 template <uint32_t N1 = 2, uint32_t N2 = 3, uint32_t N3 = 4>
 class Topology {
 public:
-    Topology() {
-
-    };
+    Topology() { }
     ~Topology()
     {
         fout.close();
-    };
+    }
     Topology(uint32_t _length)
         : Length(_length)
     {

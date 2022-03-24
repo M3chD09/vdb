@@ -17,32 +17,32 @@
 
 class Voxel {
 public:
-    Voxel() {};
-    ~Voxel() {};
-    static constexpr uint32_t edgeLength() { return 1; };
-    static constexpr uint32_t sumN() { return 0; };
+    Voxel() { }
+    ~Voxel() { }
+    static constexpr uint32_t edgeLength() { return 1; }
+    static constexpr uint32_t sumN() { return 0; }
     static float edgeLengthGL(const uint32_t halfRootEdgeLength)
     {
         return (float)edgeLength() / (float)halfRootEdgeLength;
-    };
+    }
     static Vector3D<uint32_t> getCoord(uint32_t index)
     {
         return Morton::decode((uint64_t)(index));
-    };
+    }
     static Vector3D<float> getCoordGL(uint32_t index, uint32_t halfRootEdgeLength)
     {
         Vector3D<uint32_t> coord = getCoord(index);
         return Vector3D<float>(((float)coord.x + 0.5f) / (float)halfRootEdgeLength - 1.0f,
             ((float)coord.y + 0.5f) / (float)halfRootEdgeLength - 1.0f,
             ((float)coord.z + 0.5f) / (float)halfRootEdgeLength - 1.0f);
-    };
+    }
 };
 
 template <uint32_t N>
 class Brick : public Node<Voxel, N> {
 public:
-    Brick() {};
-    ~Brick() {};
+    Brick() { }
+    ~Brick() { }
 
     void subdivide()
     {

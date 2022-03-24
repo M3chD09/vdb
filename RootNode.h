@@ -9,7 +9,7 @@ public:
     {
         this->id = 0;
         this->subdivide();
-    };
+    }
 
-    ~RootNode() {};
+    ~RootNode() { }
 };

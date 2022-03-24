@@ -10,8 +10,8 @@
 
 class Morton {
 public:
-    Morton() {};
-    ~Morton() {};
+    Morton() { }
+    ~Morton() { }
 
     static uint64_t encode(const Vector3D<uint32_t>& v)
     {

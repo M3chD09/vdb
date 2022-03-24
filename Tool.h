@@ -10,13 +10,13 @@ public:
     Tool()
     {
         loadPaths();
-    };
-    ~Tool() {};
+    }
+    ~Tool() { }
     Tool(float _radius)
         : radius(_radius)
     {
         loadPaths();
-    };
+    }
 
     BBox3D<float> getBBox()
     {

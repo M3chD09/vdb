@@ -17,18 +17,18 @@
 template <class T, uint32_t N>
 class Node {
 public:
-    Node() {};
-    virtual ~Node() {};
+    Node() { }
+    virtual ~Node() { }
 
-    static constexpr uint32_t edgeLength() { return (1 << N) * T::edgeLength(); };
-    static constexpr uint32_t halfEdgeLength() { return edgeLength() >> 1; };
-    static constexpr uint32_t maxChildrenCount() { return 1 << (N * 3); };
-    static constexpr uint32_t sumN() { return N + T::sumN(); };
+    static constexpr uint32_t edgeLength() { return (1 << N) * T::edgeLength(); }
+    static constexpr uint32_t halfEdgeLength() { return edgeLength() >> 1; }
+    static constexpr uint32_t maxChildrenCount() { return 1 << (N * 3); }
+    static constexpr uint32_t sumN() { return N + T::sumN(); }
 
     float edgeLengthGL(const uint32_t halfRootEdgeLength)
     {
         return (float)edgeLength() / (float)halfRootEdgeLength;
-    };
+    }
 
     Vector3D<uint32_t> getCoord(void)
     {
@@ -56,7 +56,7 @@ public:
     uint64_t calChildId(uint32_t i)
     {
         return (uint64_t)i | (id << (3 * N));
-    };
+    }
 
     bool isAllVertexInside(std::function<bool(const Vector3D<float>&)> isInside, const uint32_t halfRootEdgeLength)
     {
@@ -82,8 +82,8 @@ public:
 template <class T, uint32_t N>
 class NodeWithChildren : public Node<T, N> {
 public:
-    NodeWithChildren() {};
-    ~NodeWithChildren() {};
+    NodeWithChildren() { }
+    virtual ~NodeWithChildren() { }
 
     void reset()
     {

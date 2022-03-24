@@ -8,8 +8,8 @@
 template <class T>
 class BBox3D {
 public:
-    BBox3D() {};
-    ~BBox3D() {};
+    BBox3D() { }
+    ~BBox3D() { }
 
     BBox3D(const Vector3D<T>& min, const Vector3D<T>& max)
         : min(min)
