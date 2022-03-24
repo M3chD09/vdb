@@ -41,20 +41,17 @@ public:
     }
     T distanceToPoint(const Vector3D<T>& p) const
     {
-        return (p - *this).length();
+        return (*this - p).length();
     }
     T distanceToLine(const Vector3D<T>& p, const Vector3D<T>& q)
     {
-        Vector3D<T> v = q - p;
-        Vector3D<T> w = *this - p;
-        T c1 = w.dot(v);
-        if (c1 <= 0)
-            return distanceToPoint(p);
-        T c2 = v.dot(v);
-        if (c2 <= c1)
-            return distanceToPoint(q);
-        return (v * (c1 / c2)).length();
+        if (q == 0) {
+            return (*this - p).length();
+        }
+        Vector3D<T> v = p + q * (*this - p).dot(q);
+        return (*this - v).length();
     }
+
     Vector3D<T> normalize() const
     {
         T len = length();
@@ -91,6 +88,14 @@ public:
     Vector3D operator/(T v) const
     {
         return Vector3D(x / v, y / v, z / v);
+    }
+    bool operator==(T v) const
+    {
+        return x == v && y == v && z == v;
+    }
+    bool operator!=(T v) const
+    {
+        return x != v || y != v || z != v;
     }
     bool operator==(const Vector3D& v) const
     {
