@@ -25,7 +25,7 @@ public:
         , z(v.z)
     {
     }
-    ~Vector3D() { }
+    ~Vector3D() = default;
 
     T length() const
     {

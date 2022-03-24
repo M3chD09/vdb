@@ -11,5 +11,5 @@ public:
         this->subdivide();
     }
 
-    ~RootNode() { }
+    ~RootNode() = default;
 };

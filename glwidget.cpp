@@ -69,7 +69,7 @@ void GLWidget::initializeGL()
 #endif
 
     topology.calculateVoxels(coords, sizes);
-    unsigned int leafCount = (unsigned int)coords.size();
+    auto leafCount = (unsigned int)coords.size();
 
     if (!vao.isCreated()) {
         vao.create();
@@ -109,7 +109,7 @@ void GLWidget::paintGL()
     matProjection.perspective(camera.fov, qreal(width()) / qreal(height()), 0.1f, 100.f);
     program->setUniformValue(locProjection, matProjection);
 
-    unsigned int leafCount = (unsigned int)coords.size();
+    auto leafCount = (unsigned int)coords.size();
 
     vao.bind();
     vbo.allocate(leafCount * 4 * sizeof(float));

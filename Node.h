@@ -17,8 +17,8 @@
 template <class T, uint32_t N>
 class Node {
 public:
-    Node() { }
-    virtual ~Node() { }
+    Node() = default;
+    virtual ~Node() = default;
 
     static constexpr uint32_t edgeLength() { return (1 << N) * T::edgeLength(); }
     static constexpr uint32_t halfEdgeLength() { return edgeLength() >> 1; }
@@ -30,7 +30,7 @@ public:
         return (float)edgeLength() / (float)halfRootEdgeLength;
     }
 
-    Vector3D<uint32_t> getCoord(void)
+    Vector3D<uint32_t> getCoord()
     {
         return Morton::decode((uint64_t)id << (sumN() * 3)) + halfEdgeLength();
     }
@@ -38,12 +38,14 @@ public:
     Vector3D<float> getCoordGL(const uint32_t halfRootEdgeLength)
     {
         Vector3D<uint32_t> coord = getCoord();
-        return Vector3D<float>((float)coord.x / (float)halfRootEdgeLength - 1.0f,
+        return {
+            (float)coord.x / (float)halfRootEdgeLength - 1.0f,
             (float)coord.y / (float)halfRootEdgeLength - 1.0f,
-            (float)coord.z / (float)halfRootEdgeLength - 1.0f);
+            (float)coord.z / (float)halfRootEdgeLength - 1.0f
+        };
     }
 
-    BBox3D<uint32_t> getBBox(void)
+    BBox3D<uint32_t> getBBox()
     {
         return BBox3D<uint32_t>(getCoord(), halfEdgeLength());
     }
@@ -58,7 +60,7 @@ public:
         return (uint64_t)i | (id << (3 * N));
     }
 
-    bool isAllVertexInside(std::function<bool(const Vector3D<float>&)> isInside, const uint32_t halfRootEdgeLength)
+    bool isAllVertexInside(const std::function<bool(const Vector3D<float>&)>& isInside, const uint32_t halfRootEdgeLength)
     {
         for (int8_t i = -1; i <= 1; i += 2) {
             for (int8_t j = -1; j <= 1; j += 2) {
@@ -74,7 +76,7 @@ public:
         return true;
     }
 
-    uint64_t id;
+    uint64_t id = 0;
     bool isActive = true;
     bool hasChildren = false;
 };
@@ -82,8 +84,8 @@ public:
 template <class T, uint32_t N>
 class NodeWithChildren : public Node<T, N> {
 public:
-    NodeWithChildren() { }
-    virtual ~NodeWithChildren() { }
+    NodeWithChildren() = default;
+    virtual ~NodeWithChildren() = default;
 
     void reset()
     {

@@ -8,8 +8,8 @@
 template <class T>
 class BBox3D {
 public:
-    BBox3D() { }
-    ~BBox3D() { }
+    BBox3D() = default;
+    ~BBox3D() = default;
 
     BBox3D(const Vector3D<T>& min, const Vector3D<T>& max)
         : min(min)
@@ -27,12 +27,12 @@ public:
     {
     }
 
-    bool IsEmpty() const
+    [[nodiscard]] bool IsEmpty() const
     {
         return min == max;
     }
 
-    bool IsValid() const
+    [[nodiscard]] bool IsValid() const
     {
         return min < max;
     }

@@ -16,12 +16,12 @@
 template <uint32_t N1 = 2, uint32_t N2 = 3, uint32_t N3 = 4>
 class Topology {
 public:
-    Topology() { }
+    Topology() = default;
     ~Topology()
     {
         fout.close();
     }
-    Topology(uint32_t _length)
+    explicit Topology(uint32_t _length)
         : Length(_length)
     {
     }
@@ -50,7 +50,7 @@ public:
         return coord * (float)(Length >> 1);
     }
 
-    void subtract(const BBox3D<float>& bbox, std::function<bool(const Vector3D<float>&)> isInside)
+    void subtract(const BBox3D<float>& bbox, const std::function<bool(const Vector3D<float>&)>& isInside)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
         BBox3D<float> bboxGL = BBox3D<float>(coordToGL(bbox.min), coordToGL(bbox.max));

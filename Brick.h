@@ -17,8 +17,8 @@
 
 class Voxel {
 public:
-    Voxel() { }
-    ~Voxel() { }
+    Voxel() = default;
+    ~Voxel() = default;
     static constexpr uint32_t edgeLength() { return 1; }
     static constexpr uint32_t sumN() { return 0; }
     static float edgeLengthGL(const uint32_t halfRootEdgeLength)
@@ -32,17 +32,19 @@ public:
     static Vector3D<float> getCoordGL(uint32_t index, uint32_t halfRootEdgeLength)
     {
         Vector3D<uint32_t> coord = getCoord(index);
-        return Vector3D<float>(((float)coord.x + 0.5f) / (float)halfRootEdgeLength - 1.0f,
+        return {
+            ((float)coord.x + 0.5f) / (float)halfRootEdgeLength - 1.0f,
             ((float)coord.y + 0.5f) / (float)halfRootEdgeLength - 1.0f,
-            ((float)coord.z + 0.5f) / (float)halfRootEdgeLength - 1.0f);
+            ((float)coord.z + 0.5f) / (float)halfRootEdgeLength - 1.0f
+        };
     }
 };
 
 template <uint32_t N>
 class Brick : public Node<Voxel, N> {
 public:
-    Brick() { }
-    ~Brick() { }
+    Brick() = default;
+    ~Brick() = default;
 
     void subdivide()
     {
@@ -60,7 +62,7 @@ public:
 #endif
     }
 
-    void subtract(const BBox3D<float>& bbox, std::function<bool(const Vector3D<float>&)> isInside, const uint32_t halfRootEdgeLength)
+    void subtract(const BBox3D<float>& bbox, const std::function<bool(const Vector3D<float>&)>& isInside, const uint32_t halfRootEdgeLength)
     {
         if (!bbox.Intersects(this->getBBoxGL(halfRootEdgeLength))) {
             return;

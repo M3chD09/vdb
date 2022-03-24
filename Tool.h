@@ -12,21 +12,21 @@ public:
     {
         loadPaths();
     }
-    ~Tool() { }
-    Tool(float _radius)
+    ~Tool() = default;
+    explicit Tool(float _radius)
         : radius(_radius)
     {
         loadPaths();
     }
 
-    BBox3D<float> getBBox()
+    [[nodiscard]] BBox3D<float> getBBox() const
     {
         BBox3D<float> b = BBox3D<float>(center - radius, center + radius);
         b.max.z = std::numeric_limits<float>::max();
         return b;
     }
 
-    bool isInside(const Vector3D<float>& p)
+    [[nodiscard]] bool isInside(const Vector3D<float>& p) const
     {
         Vector3D<float> p2 = p - center;
         if (p2.z <= 0 && p2.z >= -radius) {

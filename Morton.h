@@ -10,8 +10,8 @@
 
 class Morton {
 public:
-    Morton() { }
-    ~Morton() { }
+    Morton() = default;
+    ~Morton() = default;
 
     static uint64_t encode(const Vector3D<uint32_t>& v)
     {
@@ -30,10 +30,11 @@ public:
     static Vector3D<uint32_t> decode(uint64_t morton)
     {
 #ifdef USE_BMI2
-        return Vector3D<uint32_t>(
+        return {
             (uint32_t)_pext_u64(morton, x3_mask),
             (uint32_t)_pext_u64(morton, y3_mask),
-            (uint32_t)_pext_u64(morton, z3_mask));
+            (uint32_t)_pext_u64(morton, z3_mask)
+        };
 #else
         return Vector3D<uint32_t>(compactBits(morton >> 2), compactBits(morton >> 1), compactBits(morton));
 #endif
