@@ -3,6 +3,7 @@
 #include "BBox3D.h"
 #include "Vector3D.h"
 
+#include <limits>
 #include <vector>
 
 class Tool {
@@ -20,7 +21,9 @@ public:
 
     BBox3D<float> getBBox()
     {
-        return BBox3D<float>(center - radius, center + radius);
+        BBox3D<float> b = BBox3D<float>(center - radius, center + radius);
+        b.max.z = std::numeric_limits<float>::max();
+        return b;
     }
 
     bool isInside(const Vector3D<float>& p)
