@@ -119,7 +119,7 @@ public:
 #endif
     }
 
-    void subtract(const BBox3D<float>& bbox, std::function<bool(const Vector3D<float>&)> isInside, const uint32_t halfRootEdgeLength)
+    void subtract(const BBox3D<float>& bbox, const std::function<bool(const Vector3D<float>&)>& isInside, const uint32_t halfRootEdgeLength)
     {
         if (!bbox.Intersects(this->getBBoxGL(halfRootEdgeLength))) {
             return;
