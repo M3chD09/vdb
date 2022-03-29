@@ -45,11 +45,6 @@ public:
         };
     }
 
-    BBox3D<uint32_t> getBBox()
-    {
-        return BBox3D<uint32_t>(getCoord(), halfEdgeLength());
-    }
-
     BBox3D<float> getBBoxGL(const uint32_t halfRootEdgeLength)
     {
         return BBox3D<float>(getCoordGL(halfRootEdgeLength), edgeLengthGL(halfRootEdgeLength) / 2.0f);
@@ -87,6 +82,30 @@ public:
     NodeWithChildren() = default;
     virtual ~NodeWithChildren() = default;
 
+    void initialize(const BBox3D<float>& bbox, const uint32_t halfRootEdgeLength)
+    {
+        this->reset();
+        if (bbox.isInside(this->getBBoxGL(halfRootEdgeLength))) {
+            return;
+        }
+        if (!bbox.intersects(this->getBBoxGL(halfRootEdgeLength))) {
+            this->isActive = false;
+            return;
+        }
+        this->subdivide();
+#if USE_TBB
+        tbb::parallel_for(tbb::blocked_range<uint32_t>(0, Node<T, N>::maxChildrenCount()), [&](const tbb::blocked_range<uint32_t>& r) {
+            for (uint32_t i = r.begin(); i != r.end(); ++i) {
+                this->children[i]->initialize(bbox, halfRootEdgeLength);
+            }
+        });
+#else
+        for (uint32_t i = 0; i < Node<T, N>::maxChildrenCount(); i++) {
+            this->children[i]->initialize(bbox, halfRootEdgeLength);
+        }
+#endif
+    }
+
     void reset()
     {
         for (auto& child : children) {
@@ -121,7 +140,7 @@ public:
 
     void subtract(const BBox3D<float>& bbox, const std::function<bool(const Vector3D<float>&)>& isInside, const uint32_t halfRootEdgeLength)
     {
-        if (!bbox.Intersects(this->getBBoxGL(halfRootEdgeLength))) {
+        if (!bbox.intersects(this->getBBoxGL(halfRootEdgeLength))) {
             return;
         }
         if (this->isAllVertexInside(isInside, halfRootEdgeLength)) {

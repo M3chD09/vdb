@@ -27,32 +27,37 @@ public:
     {
     }
 
-    [[nodiscard]] bool IsEmpty() const
+    [[nodiscard]] bool isEmpty() const
     {
         return min == max;
     }
 
-    [[nodiscard]] bool IsValid() const
+    [[nodiscard]] bool isValid() const
     {
         return min < max;
     }
 
-    bool IsInside(const Vector3D<T>& p) const
+    bool isInside(const Vector3D<T>& p) const
     {
         return min <= p && p <= max;
     }
 
-    bool Intersects(const BBox3D& b) const
+    bool isInside(const BBox3D<T>& bbox) const
+    {
+        return min <= bbox.min && bbox.max <= max;
+    }
+
+    bool intersects(const BBox3D& b) const
     {
         return min <= b.max && b.min <= max;
     }
 
-    bool Intersects(const Vector3D<T>& p, const Vector3D<T>& q) const
+    bool intersects(const Vector3D<T>& p, const Vector3D<T>& q) const
     {
         return min <= p && p <= max && min <= q && q <= max;
     }
 
-    bool Intersects(const Vector3D<T>& p, const Vector3D<T>& q, Vector3D<T>& intersection) const
+    bool intersects(const Vector3D<T>& p, const Vector3D<T>& q, Vector3D<T>& intersection) const
     {
         if (min <= p && p <= max && min <= q && q <= max) {
             intersection = std::max(p, q);

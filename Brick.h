@@ -46,6 +46,55 @@ public:
     Brick() = default;
     ~Brick() = default;
 
+    void initialize(const BBox3D<float>& bbox, const uint32_t halfRootEdgeLength)
+    {
+        this->reset();
+        if (bbox.isInside(this->getBBoxGL(halfRootEdgeLength))) {
+            return;
+        }
+        if (!bbox.intersects(this->getBBoxGL(halfRootEdgeLength))) {
+            this->isActive = false;
+            return;
+        }
+        this->subdivide();
+#ifdef USE_TBB
+        tbb::parallel_for(tbb::blocked_range<uint32_t>(0, Node<Voxel, N>::maxChildrenCount() / bitLength), [&](const tbb::blocked_range<uint32_t>& r) {
+            for (uint32_t i = r.begin(); i != r.end(); ++i) {
+                voxels[i] = std::make_unique<std::bitset<bitLength>>(0xffff'ffff'ffff'ffff);
+                for (uint32_t j = 0; j < bitLength; ++j) {
+                    if (voxels[i]->test(j)) {
+                        uint64_t index = this->calChildId(i * bitLength + j);
+                        if (!bbox.isInside(Voxel::getCoordGL(index, halfRootEdgeLength))) {
+                            voxels[i]->reset(j);
+                        }
+                    }
+                }
+            }
+        });
+#else
+        for (uint32_t i = 0; i < Node<Voxel, N>::maxChildrenCount() / bitLength; ++i) {
+            voxels[i] = std::make_unique<std::bitset<bitLength>>(0xffff'ffff'ffff'ffff);
+            for (uint32_t j = 0; j < bitLength; ++j) {
+                if (voxels[i]->test(j)) {
+                    uint64_t index = this->calChildId(i * bitLength + j);
+                    if (!bbox.isInside(Voxel::getCoordGL(index, halfRootEdgeLength))) {
+                        voxels[i]->reset(j);
+                    }
+                }
+            }
+        }
+#endif
+    }
+
+    void reset()
+    {
+        for (auto& voxel : voxels) {
+            voxel.reset();
+        }
+        this->isActive = true;
+        this->hasChildren = false;
+    }
+
     void subdivide()
     {
         this->hasChildren = true;
@@ -64,7 +113,7 @@ public:
 
     void subtract(const BBox3D<float>& bbox, const std::function<bool(const Vector3D<float>&)>& isInside, const uint32_t halfRootEdgeLength)
     {
-        if (!bbox.Intersects(this->getBBoxGL(halfRootEdgeLength))) {
+        if (!bbox.intersects(this->getBBoxGL(halfRootEdgeLength))) {
             return;
         }
         if (!this->hasChildren) {
@@ -136,8 +185,7 @@ public:
         }
     }
 
+private:
     static const size_t bitLength = 64;
     std::unique_ptr<std::bitset<bitLength>> voxels[Node<Voxel, N>::maxChildrenCount() / bitLength];
-
-private:
 };

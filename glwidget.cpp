@@ -150,7 +150,7 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
         timerCal->stop();
         tool.currentPathIndex = 0;
         tool.currentPathListIndex = 0;
-        topology.reset();
+        topology.initialize();
         topology.calculateVoxels(coords, sizes);
     }
 
