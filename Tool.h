@@ -42,12 +42,12 @@ public:
     {
         paths.clear();
         paths.push_back(std::vector<Vector3D<float>> {
-            Vector3D<float>(0, 400, 500),
-            Vector3D<float>(-300, -400, 500),
-            Vector3D<float>(400, 100, 500),
-            Vector3D<float>(-400, 100, 500),
-            Vector3D<float>(300, -400, 500),
-            Vector3D<float>(0, 400, 500),
+            Vector3D<float>(0, 400, 450),
+            Vector3D<float>(-300, -400, 450),
+            Vector3D<float>(400, 100, 450),
+            Vector3D<float>(-400, 100, 450),
+            Vector3D<float>(300, -400, 450),
+            Vector3D<float>(0, 400, 450),
         });
         center = paths[0][0];
     }
