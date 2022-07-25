@@ -4,15 +4,15 @@
 #include "Node.h"
 #include "Vector3D.h"
 
-#ifdef USE_TBB
-#include <tbb/parallel_for.h>
-#endif
-
+#include <algorithm>
+#include <array>
 #include <bitset>
 #include <cmath>
 #include <cstdint>
+#include <execution>
 #include <functional>
 #include <memory>
+#include <ranges>
 #include <vector>
 
 class Voxel {
@@ -57,33 +57,18 @@ public:
             return;
         }
         this->subdivide();
-#ifdef USE_TBB
-        tbb::parallel_for(tbb::blocked_range<uint32_t>(0, Node<Voxel, N>::maxChildrenCount() / bitLength), [&](const tbb::blocked_range<uint32_t>& r) {
-            for (uint32_t i = r.begin(); i != r.end(); ++i) {
-                voxels[i] = std::make_unique<std::bitset<bitLength>>(0xffff'ffff'ffff'ffff);
-                for (uint32_t j = 0; j < bitLength; ++j) {
-                    if (voxels[i]->test(j)) {
-                        uint64_t index = this->calChildId(i * bitLength + j);
-                        if (!bbox.isInside(Voxel::getCoordGL(index, halfRootEdgeLength))) {
-                            voxels[i]->reset(j);
-                        }
+        std::for_each(std::execution::par, this->voxels.begin(), this->voxels.end(), [&](auto& v) {
+            uint32_t i = &v - voxels.data();
+            v = std::make_unique<std::bitset<bitLength>>(0xffff'ffff'ffff'ffff);
+            for (uint32_t j = 0; j < bitLength; ++j) {
+                if (v->test(j)) {
+                    uint64_t index = this->calChildId(i * bitLength + j);
+                    if (!bbox.isInside(Voxel::getCoordGL(index, halfRootEdgeLength))) {
+                        v->reset(j);
                     }
                 }
             }
         });
-#else
-        for (uint32_t i = 0; i < Node<Voxel, N>::maxChildrenCount() / bitLength; ++i) {
-            voxels[i] = std::make_unique<std::bitset<bitLength>>(0xffff'ffff'ffff'ffff);
-            for (uint32_t j = 0; j < bitLength; ++j) {
-                if (voxels[i]->test(j)) {
-                    uint64_t index = this->calChildId(i * bitLength + j);
-                    if (!bbox.isInside(Voxel::getCoordGL(index, halfRootEdgeLength))) {
-                        voxels[i]->reset(j);
-                    }
-                }
-            }
-        }
-#endif
     }
 
     void reset()
@@ -98,17 +83,9 @@ public:
     void subdivide()
     {
         this->hasChildren = true;
-#ifdef USE_TBB
-        tbb::parallel_for(tbb::blocked_range<uint32_t>(0, Node<Voxel, N>::maxChildrenCount() / bitLength), [&](const tbb::blocked_range<uint32_t>& r) {
-            for (uint32_t i = r.begin(); i != r.end(); ++i) {
-                voxels[i] = std::make_unique<std::bitset<bitLength>>(0xffff'ffff'ffff'ffff);
-            }
+        std::for_each(std::execution::par, voxels.begin(), voxels.end(), [&](auto& v) {
+            v = std::make_unique<std::bitset<bitLength>>(0xffff'ffff'ffff'ffff);
         });
-#else
-        for (uint32_t i = 0; i < Node<Voxel, N>::maxChildrenCount() / bitLength; ++i) {
-            voxels[i] = std::make_unique<std::bitset<bitLength>>(0xffff'ffff'ffff'ffff);
-        }
-#endif
     }
 
     void subtract(const BBox3D<float>& bbox, const std::function<bool(const Vector3D<float>&)>& isInside, const uint32_t halfRootEdgeLength)
@@ -119,34 +96,14 @@ public:
         if (!this->hasChildren) {
             this->subdivide();
         }
-#ifdef USE_TBB
-        tbb::parallel_for(tbb::blocked_range<uint32_t>(0, Node<Voxel, N>::maxChildrenCount() / bitLength), [&](const tbb::blocked_range<uint32_t>& r) {
-            for (uint32_t i = r.begin(); i != r.end(); ++i) {
-                if (voxels[i] == nullptr) {
-                    continue;
-                }
-                if (voxels[i]->none()) {
-                    voxels[i].reset();
-                    continue;
-                }
-                for (uint32_t j = 0; j < bitLength; ++j) {
-                    if (voxels[i]->test(j)) {
-                        uint64_t index = this->calChildId(i * bitLength + j);
-                        if (isInside(Voxel::getCoordGL(index, halfRootEdgeLength))) {
-                            voxels[i]->reset(j);
-                        }
-                    }
-                }
+        std::for_each(std::execution::par, voxels.begin(), voxels.end(), [&](auto& v) {
+            uint32_t i = &v - voxels.data();
+            if (v == nullptr) {
+                return;
             }
-        });
-#else
-        for (uint32_t i = 0; i < Node<Voxel, N>::maxChildrenCount() / bitLength; ++i) {
-            if (voxels[i] == nullptr) {
-                continue;
-            }
-            if (voxels[i]->none()) {
-                voxels[i].reset();
-                continue;
+            if (v->none()) {
+                v.reset();
+                return;
             }
             for (uint32_t j = 0; j < bitLength; ++j) {
                 if (voxels[i]->test(j)) {
@@ -156,8 +113,7 @@ public:
                     }
                 }
             }
-        }
-#endif
+        });
     }
 
     void calculateVoxels(std::vector<Vector3D<float>>& coords, std::vector<float>& sizes, const uint32_t halfRootEdgeLength)
@@ -187,5 +143,5 @@ public:
 
 private:
     static const size_t bitLength = 64;
-    std::unique_ptr<std::bitset<bitLength>> voxels[Node<Voxel, N>::maxChildrenCount() / bitLength];
+    std::array<std::unique_ptr<std::bitset<bitLength>>, Node<Voxel, N>::maxChildrenCount() / bitLength> voxels;
 };

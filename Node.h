@@ -4,14 +4,14 @@
 #include "Morton.h"
 #include "Vector3D.h"
 
-#ifdef USE_TBB
-#include <tbb/parallel_for.h>
-#endif
-
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
+#include <execution>
 #include <functional>
 #include <memory>
+#include <ranges>
 #include <vector>
 
 template <class T, uint32_t N>
@@ -93,17 +93,10 @@ public:
             return;
         }
         this->subdivide();
-#if USE_TBB
-        tbb::parallel_for(tbb::blocked_range<uint32_t>(0, Node<T, N>::maxChildrenCount()), [&](const tbb::blocked_range<uint32_t>& r) {
-            for (uint32_t i = r.begin(); i != r.end(); ++i) {
-                this->children[i]->initialize(bbox, halfRootEdgeLength);
-            }
+
+        std::for_each(std::execution::par, this->children.begin(), this->children.end(), [&](auto& c) {
+            c->initialize(bbox, halfRootEdgeLength);
         });
-#else
-        for (uint32_t i = 0; i < Node<T, N>::maxChildrenCount(); i++) {
-            this->children[i]->initialize(bbox, halfRootEdgeLength);
-        }
-#endif
     }
 
     void reset()
@@ -118,24 +111,13 @@ public:
     void subdivide()
     {
         this->hasChildren = true;
-#if USE_TBB
-        tbb::parallel_for(tbb::blocked_range<uint32_t>(0, Node<T, N>::maxChildrenCount()), [&](const tbb::blocked_range<uint32_t>& r) {
-            for (uint32_t i = r.begin(); i != r.end(); ++i) {
-                this->children[i] = std::make_unique<T>();
-                this->children[i]->id = this->calChildId(i);
-                this->children[i]->isActive = true;
-                this->children[i]->hasChildren = false;
-            }
+        std::for_each(std::execution::par, this->children.begin(), this->children.end(), [&](auto& c) {
+            uint32_t i = &c - this->children.data();
+            c = std::make_unique<T>();
+            c->id = this->calChildId(i);
+            c->isActive = true;
+            c->hasChildren = false;
         });
-#else
-        for (uint32_t i = 0; i < Node<T, N>::maxChildrenCount(); i++) {
-            this->children[i] = std::make_unique<T>();
-            this->children[i]->id = this->calChildId(i);
-            this->children[i]->isActive = true;
-            this->children[i]->hasChildren = false;
-        }
-
-#endif
     }
 
     void subtract(const BBox3D<float>& bbox, const std::function<bool(const Vector3D<float>&)>& isInside, const uint32_t halfRootEdgeLength)
@@ -150,21 +132,11 @@ public:
         if (!this->hasChildren) {
             this->subdivide();
         }
-#if USE_TBB
-        tbb::parallel_for(tbb::blocked_range<uint32_t>(0, Node<T, N>::maxChildrenCount()), [&](const tbb::blocked_range<uint32_t>& r) {
-            for (uint32_t i = r.begin(); i != r.end(); ++i) {
-                if (this->children[i] != nullptr && this->children[i]->isActive) {
-                    this->children[i]->subtract(bbox, isInside, halfRootEdgeLength);
-                }
+        std::for_each(std::execution::par, this->children.begin(), this->children.end(), [&](auto& c) {
+            if (c != nullptr && c->isActive) {
+                c->subtract(bbox, isInside, halfRootEdgeLength);
             }
         });
-#else
-        for (uint32_t i = 0; i < Node<T, N>::maxChildrenCount(); i++) {
-            if (this->children[i] != nullptr && this->children[i]->isActive) {
-                this->children[i]->subtract(bbox, isInside, halfRootEdgeLength);
-            }
-        }
-#endif
     }
 
     void calculateVoxels(std::vector<Vector3D<float>>& coords, std::vector<float>& sizes, const uint32_t halfRootEdgeLength)
@@ -185,5 +157,5 @@ public:
         }
     }
 
-    std::unique_ptr<T> children[Node<T, N>::maxChildrenCount()] = { nullptr };
+    std::array<std::unique_ptr<T>, Node<T, N>::maxChildrenCount()> children = { nullptr };
 };

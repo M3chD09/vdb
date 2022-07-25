@@ -65,10 +65,6 @@ void GLWidget::initializeGL()
     program->setUniformValue("lightColor", lightColor);
     program->setUniformValue("lightPos", lightPos);
 
-#ifdef USE_TBB
-    std::cout << "Using TBB" << std::endl;
-#endif
-
     topology.calculateVoxels(coords, sizes);
     auto leafCount = (unsigned int)coords.size();
 

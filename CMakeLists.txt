@@ -8,20 +8,13 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-option(USE_TBB "Use TBB to build the project" ON)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 find_package(Qt6 COMPONENTS OpenGL REQUIRED)
 find_package(Qt6 COMPONENTS OpenGLWidgets REQUIRED)
-
-if(USE_TBB)
-    find_package(TBB CONFIG REQUIRED)
-    add_definitions( -DUSE_TBB=1 )
-endif()
 
 set(PROJECT_SOURCES
     camera.cpp
@@ -56,10 +49,6 @@ endif()
 target_link_libraries(vdb PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(vdb PRIVATE Qt6::OpenGL)
 target_link_libraries(vdb PRIVATE Qt6::OpenGLWidgets)
-
-if(USE_TBB)
-    target_link_libraries(vdb PRIVATE TBB::tbb)
-endif()
 
 set_target_properties(vdb PROPERTIES
 #    WIN32_EXECUTABLE TRUE
