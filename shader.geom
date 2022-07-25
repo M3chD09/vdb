@@ -1,6 +1,6 @@
 #version 430 core
 layout(points) in;
-layout(triangle_strip, max_vertices = 24) out;
+layout(triangle_strip, max_vertices = 36) out;
 
 in VS_OUT
 {
@@ -38,11 +38,11 @@ void main()
     }
 
     int indices[6][4] = {
-        { 0, 1, 2, 3 },
+        { 0, 2, 1, 3 },
         { 0, 1, 4, 5 },
-        { 0, 2, 4, 6 },
+        { 0, 4, 2, 6 },
         { 1, 3, 5, 7 },
-        { 2, 3, 6, 7 },
+        { 2, 6, 3, 7 },
         { 4, 5, 6, 7 },
     };
 
@@ -56,7 +56,14 @@ void main()
     };
 
     for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 4; j++) {
+        for (int j = 0; j < 3; j++) {
+            gs_out.fragPos = vec3(model * vertices[indices[i][j]]);
+            gs_out.normal = normals[i];
+            gl_Position = mv * vec4(gs_out.fragPos, 1.0);
+            EmitVertex();
+        }
+        EndPrimitive();
+        for (int j = 3; j > 0; j--) {
             gs_out.fragPos = vec3(model * vertices[indices[i][j]]);
             gs_out.normal = normals[i];
             gl_Position = mv * vec4(gs_out.fragPos, 1.0);

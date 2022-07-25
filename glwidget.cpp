@@ -48,6 +48,7 @@ void GLWidget::initializeGL()
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
+    glEnable(GL_CULL_FACE);
 
     program = new QOpenGLShaderProgram;
     program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader.vert");
