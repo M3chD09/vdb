@@ -2,81 +2,32 @@
 
 #include "Vector3D.h"
 
-#include <algorithm>
 #include <ostream>
 
 template <class T>
 class BBox3D {
 public:
-    BBox3D() = default;
-    ~BBox3D() = default;
+    constexpr inline BBox3D() = default;
+    virtual constexpr inline ~BBox3D() = default;
 
-    BBox3D(const Vector3D<T>& min, const Vector3D<T>& max)
-        : min(min)
-        , max(max)
-    {
-    }
-    BBox3D(const Vector3D<T>& center, const T halfSize)
-        : min(center - Vector3D<T>(halfSize, halfSize, halfSize))
-        , max(center + Vector3D<T>(halfSize, halfSize, halfSize))
-    {
-    }
-    BBox3D(const Vector3D<T>& center, const T halfSizeX, const T halfSizeY, const T halfSizeZ)
-        : min(center - Vector3D<T>(halfSizeX, halfSizeY, halfSizeZ))
-        , max(center + Vector3D<T>(halfSizeX, halfSizeY, halfSizeZ))
-    {
-    }
+    virtual constexpr inline bool isAxisAligned() const = 0;
+    virtual constexpr inline Vector3D<T> getCenter() const = 0;
+    virtual constexpr inline Vector3D<T> getMin() const = 0;
+    virtual constexpr inline Vector3D<T> getMax() const = 0;
+    virtual constexpr inline Vector3D<T> getAxis(int index) const = 0;
+    virtual constexpr inline T getHalfSize(int index) const = 0;
+    virtual constexpr inline bool isEmpty() const = 0;
+    virtual constexpr inline bool isValid() const = 0;
+    virtual constexpr inline bool isInside(const Vector3D<T>& p) const = 0;
+    virtual bool isInside(const BBox3D<T>& b) const = 0;
+    virtual bool intersects(const BBox3D<T>& b) const = 0;
 
-    [[nodiscard]] bool isEmpty() const
+    friend std::ostream& operator<<(std::ostream& os, const BBox3D<T>& b) noexcept
     {
-        return min == max;
+        b.print(os);
+        return os;
     }
 
-    [[nodiscard]] bool isValid() const
-    {
-        return min < max;
-    }
-
-    bool isInside(const Vector3D<T>& p) const
-    {
-        return min <= p && p <= max;
-    }
-
-    bool isInside(const BBox3D<T>& bbox) const
-    {
-        return min <= bbox.min && bbox.max <= max;
-    }
-
-    bool intersects(const BBox3D& b) const
-    {
-        return min <= b.max && b.min <= max;
-    }
-
-    bool intersects(const Vector3D<T>& p, const Vector3D<T>& q) const
-    {
-        return min <= p && p <= max && min <= q && q <= max;
-    }
-
-    bool intersects(const Vector3D<T>& p, const Vector3D<T>& q, Vector3D<T>& intersection) const
-    {
-        if (min <= p && p <= max && min <= q && q <= max) {
-            intersection = std::max(p, q);
-            return true;
-        }
-        return false;
-    }
-
-    bool operator==(const BBox3D& b) const
-    {
-        return min == b.min && max == b.max;
-    }
-
-    Vector3D<T> min, max;
+private:
+    virtual void print(std::ostream& os) const = 0;
 };
-
-template <class T>
-std::ostream& operator<<(std::ostream& os, const BBox3D<T>& b)
-{
-    os << "BBox3D(" << b.min << ", " << b.max << ")";
-    return os;
-}

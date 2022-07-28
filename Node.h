@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AABB3D.h"
 #include "BBox3D.h"
 #include "Morton.h"
 #include "Vector3D.h"
@@ -45,9 +46,9 @@ public:
         };
     }
 
-    BBox3D<float> getBBoxGL(const uint32_t halfRootEdgeLength)
+    AABB3D<float> getBBoxGL(const uint32_t halfRootEdgeLength)
     {
-        return BBox3D<float>(getCoordGL(halfRootEdgeLength), edgeLengthGL(halfRootEdgeLength) / 2.0f);
+        return AABB3D<float>(getCoordGL(halfRootEdgeLength), edgeLengthGL(halfRootEdgeLength) / 2.0f);
     }
 
     uint64_t calChildId(uint32_t i)

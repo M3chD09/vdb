@@ -25,7 +25,7 @@ GLWidget::~GLWidget()
 
 void GLWidget::updateTopology()
 {
-    if (!tool.moveToNextPos()) {
+    if (!tool.moveToNextPosture()) {
         timerUpdate->stop();
         timerCal->stop();
         return;
@@ -145,8 +145,7 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
     if (event->key() == Qt::Key_R) {
         timerUpdate->stop();
         timerCal->stop();
-        tool.currentPathIndex = 0;
-        tool.currentPathListIndex = 0;
+        tool.reset();
         topology.initialize();
         topology.calculateVoxels(coords, sizes);
     }

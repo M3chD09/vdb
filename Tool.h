@@ -1,81 +1,46 @@
 #pragma once
 
-#include "BBox3D.h"
+#include "OBB3D.h"
 #include "Vector3D.h"
 
-#include <limits>
 #include <vector>
 
 class Tool {
 public:
     Tool()
     {
-        loadPaths();
+        loadPosture();
     }
     ~Tool() = default;
-    explicit Tool(float _radius)
+    explicit Tool(float _radius, float _height)
         : radius(_radius)
+        , height(_height)
     {
-        loadPaths();
+        loadPosture();
     }
 
-    [[nodiscard]] BBox3D<float> getBBox() const
-    {
-        BBox3D<float> b = BBox3D<float>(center - radius, center + radius);
-        b.max.z = std::numeric_limits<float>::max();
-        return b;
-    }
+    OBB3D<float> getBBox() const;
+    bool isInside(const Vector3D<float>& p) const;
 
-    [[nodiscard]] bool isInside(const Vector3D<float>& p) const
-    {
-        Vector3D<float> p2 = p - center;
-        if (p2.z <= 0 && p2.z >= -radius) {
-            return p2.distanceToPoint(Vector3D<float>(0, 0, 0)) <= radius;
-        } else if (p2.z > 0) {
-            return p2.distanceToLine(Vector3D<float>(0, 0, 0), Vector3D<float>(0, 0, 1.0f)) <= radius;
-        }
+    void reset();
+    void loadPosture();
+    bool moveToNextPosture();
 
-        return false;
-    }
-
-    void loadPaths()
-    {
-        paths.clear();
-        paths.push_back(std::vector<Vector3D<float>> {
-            Vector3D<float>(0, 400, 450),
-            Vector3D<float>(-300, -400, 450),
-            Vector3D<float>(400, 100, 450),
-            Vector3D<float>(-400, 100, 450),
-            Vector3D<float>(300, -400, 450),
-            Vector3D<float>(0, 400, 450),
-        });
-        center = paths[0][0];
-    }
-
-    bool moveToNextPos()
-    {
-        if (paths.size() <= currentPathListIndex) {
-            return false;
-        }
-        Vector3D<float> currentPos = paths[currentPathListIndex][currentPathIndex];
-        float distance = currentPos.distanceToPoint(center);
-        if (distance <= pathStep) {
-            center = currentPos;
-            currentPathIndex++;
-            if (currentPathIndex >= paths[currentPathListIndex].size()) {
-                currentPathListIndex++;
-                currentPathIndex = 0;
-            }
-        } else {
-            center += (currentPos - center).normalize() * pathStep;
-        }
-        return true;
-    }
-
-    const float pathStep = 10.0f;
+private:
     const float radius = 50.0f;
-    Vector3D<float> center;
-    size_t currentPathIndex = 0;
-    size_t currentPathListIndex = 0;
-    std::vector<std::vector<Vector3D<float>>> paths;
+    const float height = 200.0f;
+
+    struct posture {
+        Vector3D<float> center;
+        Vector3D<float> direction;
+    };
+    posture currentPosture;
+    std::vector<std::vector<posture>> postureList;
+    size_t currentPostureIndex = 0;
+    size_t currentPostureListIndex = 0;
+
+    constexpr inline bool isEndPosture() const;
+    inline void moveToNextCenter(const Vector3D<float>& nextCenter, float centerStep);
+    inline void moveToNextDirection(const Vector3D<float>& nextDirection, float directionStep);
+    void goToNextPosture();
 };

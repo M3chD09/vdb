@@ -20,6 +20,7 @@ set(PROJECT_SOURCES
     camera.cpp
     main.cpp
     glwidget.cpp
+    Tool.cpp
     shaders.qrc
 )
 

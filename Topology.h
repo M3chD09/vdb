@@ -1,9 +1,11 @@
 #pragma once
 
+#include "AABB3D.h"
 #include "BBox3D.h"
 #include "Brick.h"
 #include "InternalNode.h"
 #include "Morton.h"
+#include "OBB3D.h"
 #include "RootNode.h"
 #include "Vector3D.h"
 
@@ -42,8 +44,8 @@ public:
 
     void initialize()
     {
-        BBox3D<float> bbox(Vector3D<float>(0, 0, 0), Length / 2.0f, Width / 2.0f, Height / 2.0f);
-        BBox3D<float> bboxGL(coordToGL(bbox.min), coordToGL(bbox.max));
+        AABB3D<float> bbox(Vector3D<float>(0, 0, 0), Length / 2.0f, Width / 2.0f, Height / 2.0f);
+        AABB3D<float> bboxGL(coordToGL(bbox.getMin()), coordToGL(bbox.getMax()));
         root.initialize(bboxGL, root.halfEdgeLength());
     }
 
@@ -59,7 +61,7 @@ public:
     void subtract(const BBox3D<float>& bbox, const std::function<bool(const Vector3D<float>&)>& isInside)
     {
         auto startTime = std::chrono::high_resolution_clock::now();
-        BBox3D<float> bboxGL = BBox3D<float>(coordToGL(bbox.min), coordToGL(bbox.max));
+        auto bboxGL = OBB3D<float>(coordToGL(bbox.getCenter()), coordToGL(bbox.getAxis(0)), coordToGL(bbox.getAxis(1)), coordToGL(bbox.getAxis(2)));
         auto isInsideGL = [&](const Vector3D<float>& coord) {
             return isInside(this->coordFromGL(coord));
         };
@@ -69,12 +71,12 @@ public:
     }
 
 private:
-    Vector3D<float> coordToGL(const Vector3D<float>& coord)
+    constexpr inline Vector3D<float> coordToGL(const Vector3D<float>& coord)
     {
         return coord / (MaxEdge / 2.0f);
     }
 
-    Vector3D<float> coordFromGL(const Vector3D<float>& coord)
+    constexpr inline Vector3D<float> coordFromGL(const Vector3D<float>& coord)
     {
         return coord * (MaxEdge / 2.0f);
     }
