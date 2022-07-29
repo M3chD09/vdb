@@ -12,7 +12,6 @@
 #include <execution>
 #include <functional>
 #include <memory>
-#include <ranges>
 #include <vector>
 
 template <class T, uint32_t N>
