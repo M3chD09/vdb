@@ -61,7 +61,7 @@ jobs:
         modules: 'qtopengl qtopenglwidgets'
 
     - name: Install TBB
-      run: apt update && apt install -y libtbb-dev
+      run: sudo apt update && sudo apt install -y libtbb-dev
 
     - name: Check out
       uses: actions/checkout@v3
