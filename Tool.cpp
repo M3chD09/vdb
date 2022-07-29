@@ -16,8 +16,7 @@ constexpr inline T degreeToRadian(T degree) noexcept
 
 OBB3D<float> Tool::getBBox() const
 {
-    Vector3D<float> c = currentPosture.center;
-    c.z += height / 2.0f - radius;
+    Vector3D<float> c = currentPosture.center + currentPosture.direction.normalize() * (height / 2.0f - radius);
     Vector3D<float> axisZ = currentPosture.direction.normalize() * height / 2.0f;
     Vector3D<float> axisX = Vector3D<float>(axisZ.z, axisZ.z, -axisZ.x - axisZ.y).normalize() * radius;
     Vector3D<float> axisY = axisZ.cross(axisX).normalize() * radius;
@@ -53,6 +52,7 @@ void Tool::loadPosture()
         posture { Vector3D<float>(500, 100, 450), Vector3D<float>(0.0f, 0.0f, 1.0f) },
         posture { Vector3D<float>(500, 100, 450), Vector3D<float>(0.0f, -1.0f, 0.0f) },
     });
+
     postureList.push_back(std::vector<posture> {
         posture { Vector3D<float>(500, -400, 450), Vector3D<float>(0.0f, 1.0f, 0.7f) },
         posture { Vector3D<float>(0, -400, 450), Vector3D<float>(0.0f, 1.0f, 0.7f) },
