@@ -9,8 +9,8 @@
 template <class T>
 class OBB3D : public BBox3D<T> {
 public:
-    constexpr inline OBB3D() = default;
-    constexpr inline ~OBB3D() = default;
+    OBB3D() = default;
+    ~OBB3D() = default;
 
     constexpr inline OBB3D(const Vector3D<T>& center, const Vector3D<T>& axisX, const Vector3D<T>& axisY, const Vector3D<T>& axisZ) noexcept
         : center(center)

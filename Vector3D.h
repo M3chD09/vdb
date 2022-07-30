@@ -25,7 +25,7 @@ public:
         , z(v.z)
     {
     }
-    constexpr inline ~Vector3D() = default;
+    ~Vector3D() = default;
 
     constexpr inline bool isZero() const noexcept
     {

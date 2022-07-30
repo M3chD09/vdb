@@ -7,8 +7,8 @@
 template <class T>
 class BBox3D {
 public:
-    constexpr inline BBox3D() = default;
-    virtual constexpr inline ~BBox3D() = default;
+    BBox3D() = default;
+    virtual ~BBox3D() = default;
 
     virtual constexpr inline bool isAxisAligned() const = 0;
     virtual constexpr inline Vector3D<T> getCenter() const = 0;

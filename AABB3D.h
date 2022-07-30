@@ -9,8 +9,8 @@
 template <class T>
 class AABB3D : public BBox3D<T> {
 public:
-    constexpr inline AABB3D() = default;
-    constexpr inline ~AABB3D() = default;
+    AABB3D() = default;
+    ~AABB3D() = default;
 
     constexpr inline AABB3D(const Vector3D<T>& min, const Vector3D<T>& max) noexcept
         : min(min)
